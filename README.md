@@ -206,19 +206,6 @@ export const environment = {
 };
 ```
 
-## 🧪 Testes
-
-```bash
-# Backend
-cd backend
-npm run test        # Unit tests
-npm run test:e2e    # E2E tests
-npm run test:cov    # Coverage
-
-# Frontend
-cd frontend
-npm run test        # Unit tests com Karma
-```
 
 ## 📝 API Documentation
 
@@ -226,54 +213,4 @@ Após iniciar o backend, acesse a documentação Swagger:
 
 **http://localhost:3000/api/docs**
 
-Principais endpoints:
 
-- `GET /leads` - Listar leads
-- `POST /leads` - Criar lead
-- `PATCH /leads/:id/status` - Atualizar status
-- `GET /properties` - Listar propriedades
-- `POST /properties` - Criar propriedade
-- `GET /dashboard/overview` - Métricas do dashboard
-
-## 🤝 Contribuindo
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feat/nova-feature`)
-3. Commit suas mudanças (`git commit -m 'feat: adiciona nova feature'`)
-4. Push para a branch (`git push origin feat/nova-feature`)
-5. Abra um Pull Request
-
-### Conventional Commits
-
-Este projeto segue o padrão de [Conventional Commits](https://www.conventionalcommits.org/):
-
-- `feat:` Nova funcionalidade
-- `fix:` Correção de bug
-- `docs:` Documentação
-- `style:` Formatação de código
-- `refactor:` Refatoração
-- `test:` Testes
-- `chore:` Tarefas de build/config
-
-## 📄 Licença
-
-MIT
-
-## 👨‍💻 Autor
-
-Francisco Cesar - [GitHub](https://github.com/fcsar)
-
-## 🔥 Features Principais
-
-- ✅ Sistema de priorização inteligente
-- ✅ Cálculo automático de score
-- ✅ Gestão de propriedades rurais
-- ✅ Multi-step forms
-- ✅ Filtros avançados
-- ✅ Dashboard com métricas
-- ✅ Atualização em tempo real
-- ✅ Responsivo (mobile-first)
-- ✅ Dark mode
-- ✅ Validações robustas
-- ✅ Error handling com Toast
-- ✅ Documentação Swagger

@@ -19,7 +19,7 @@ Sistema de CRM especializado para o agronegócio, com gestão inteligente de lea
 
 ## 📋 Pré-requisitos
 
-- Node.js 18+ 
+- Node.js 20+ 
 - Docker e Docker Compose
 - Git
 

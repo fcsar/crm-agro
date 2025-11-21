@@ -1,0 +1,13 @@
+<app-sidebar></app-sidebar>
+
+<!-- Toast para mensagens globais -->\n<p-toast position="top-right" [life]="5000"></p-toast>
+
+<!-- Botão hamburger para mobile -->
+<button class="mobile-menu-btn" (click)="toggleMobileSidebar()" *ngIf="isMobile()">
+  <i class="pi pi-bars"></i>
+</button>
+
+<main class="main-content">
+  <router-outlet />
+</main>
+

@@ -1,0 +1,13 @@
+{
+  "name": "crm-agro",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:frontend": "cd frontend && npm start",
+    "dev:up": "docker-compose up --build",
+    "dev:down": "docker-compose down",
+    "dev:logs": "docker-compose logs -f",
+    "start:all": "npm run dev:up & npm run dev:frontend"
+  }
+}

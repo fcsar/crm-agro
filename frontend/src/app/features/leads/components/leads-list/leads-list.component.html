@@ -1,0 +1,340 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="leads-container">
+  <!-- Header -->
+  <div class="leads-header">
+    <div class="header-content">
+      <h1><i class="pi pi-users"></i> Leads</h1>
+      <p class="subtitle">Gerencie seus leads e oportunidades</p>
+    </div>
+    <button pButton label="Novo Lead" icon="pi pi-plus" class="p-button-primary" (click)="showNewLeadDialog()"></button>
+  </div>
+
+  <!-- Filters -->
+  <p-card class="filters-card">
+    <div class="filters-grid">
+      <span class="p-input-icon-left">
+        <i class="pi pi-search"></i>
+        <input 
+          type="text" 
+          pInputText 
+          placeholder="Buscar por nome, email..." 
+          [(ngModel)]="searchTerm"
+          (input)="applyFilters()"
+          class="w-full"
+        />
+      </span>
+      
+      <select 
+        class="filter-select"
+        [(ngModel)]="selectedStatus"
+        (change)="applyFilters()">
+        <option [value]="null">Todos os status</option>
+        <option *ngFor="let opt of statusOptions" [value]="opt.value">
+          {{ opt.label }}
+        </option>
+      </select>
+    </div>
+  </p-card>
+
+  <!-- Table -->
+  <p-card class="table-card">
+    <p-table 
+      [value]="filteredLeads" 
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} leads"
+      [globalFilterFields]="['name', 'email', 'cidade']"
+      styleClass="p-datatable-sm">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Lead</th>
+          <th>Contato</th>
+          <th>Localização</th>
+          <th>Status</th>
+          <th>Área Total</th>
+          <th>Culturas</th>
+          <th>Score</th>
+          <th>Ações</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-lead>
+        <tr [ngClass]="{'priority-row': lead.isPrioritario}">
+          <td>
+            <div class="lead-cell">
+              <div class="lead-name">
+                <strong>{{ lead.name }}</strong>
+                <p-badge *ngIf="lead.isPrioritario" value="VIP" severity="success" styleClass="ml-2"></p-badge>
+              </div>
+              <span class="text-sm text-muted">{{ getOrigemLabel(lead.origin) }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="contact-cell">
+              <div class="contact-item"><i class="pi pi-envelope"></i> {{ lead.email }}</div>
+              <div class="contact-item"><i class="pi pi-phone"></i> {{ lead.phone || '-' }}</div>
+            </div>
+          </td>
+          <td>{{ lead.city || '-' }}, {{ lead.state }}</td>
+          <td>
+            <select 
+              class="status-select"
+              [value]="lead.status"
+              (change)="updateLeadStatus(lead, $event)"
+              [ngClass]="'status-' + lead.status">
+              <option *ngFor="let opt of statusOptions.slice(1)" [value]="opt.value">
+                {{ opt.label }}
+              </option>
+            </select>
+          </td>
+          <td>
+            <div class="area-cell">
+              <strong>{{ formatNumber(lead.totalAreaHectares || 0) }}</strong> ha
+              <p-badge 
+                *ngIf="lead.totalAreaHectares && lead.totalAreaHectares > 100" 
+                value="Grande"
+                severity="success"
+                styleClass="ml-1">
+              </p-badge>
+            </div>
+          </td>
+          <td>
+            <div class="crops-cell">
+              <p-tag 
+                *ngFor="let crop of getMainCrops(lead.mainCrops)" 
+                [value]="crop"
+                severity="info"
+                styleClass="mr-1">
+              </p-tag>
+              <span *ngIf="!lead.mainCrops || getMainCrops(lead.mainCrops).length === 0" class="text-muted">-</span>
+            </div>
+          </td>
+          <td>
+            <div class="score-cell">
+              <p-badge 
+                [value]="lead.priorityScore"
+                [severity]="getScoreSeverity(lead.priorityScore)">
+              </p-badge>
+            </div>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button 
+                pButton 
+                icon="pi pi-eye" 
+                class="p-button-sm p-button-rounded p-button-text" 
+                (click)="viewLead(lead)" 
+                pTooltip="Visualizar"
+                tooltipPosition="top">
+              </button>
+              <button 
+                pButton 
+                icon="pi pi-trash" 
+                class="p-button-sm p-button-rounded p-button-text p-button-danger" 
+                (click)="deleteLead(lead)" 
+                pTooltip="Excluir"
+                tooltipPosition="top">
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="text-center">Nenhum lead encontrado</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>
+
+<!-- Dialog de Novo Lead -->
+<p-dialog 
+  [(visible)]="displayDialog" 
+  [modal]="true" 
+  [style]="{width: '700px'}"
+  [header]="dialogStep === 'lead' ? 'Novo Lead' : 'Adicionar Propriedades (Opcional)'"
+  styleClass="p-fluid"
+  [closable]="dialogStep === 'lead'">
+  
+  <!-- STEP 1: Dados do Lead -->
+  <div class="dialog-content" *ngIf="dialogStep === 'lead'">
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="name">Nome *</label>
+        <input id="name" type="text" pInputText [(ngModel)]="newLead.name" placeholder="Nome completo" />
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email *</label>
+        <input id="email" type="email" pInputText [(ngModel)]="newLead.email" placeholder="email@exemplo.com" />
+      </div>
+
+      <div class="form-field">
+        <label for="phone">Telefone *</label>
+        <input id="phone" type="text" pInputText [(ngModel)]="newLead.phone" placeholder="31999999999" />
+      </div>
+
+      <div class="form-field">
+        <label for="cpf">CPF</label>
+        <input id="cpf" type="text" pInputText [(ngModel)]="newLead.cpf" placeholder="12345678901" maxlength="11" />
+      </div>
+
+      <div class="form-field">
+        <label for="origin">Origem *</label>
+        <select id="origin" class="filter-select" [(ngModel)]="newLead.origin">
+          <option *ngFor="let opt of origemOptions" [value]="opt.value">
+            {{ opt.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="segment">Segmento *</label>
+        <select id="segment" class="filter-select" [(ngModel)]="newLead.segment">
+          <option *ngFor="let opt of segmentoOptions" [value]="opt.value">
+            {{ opt.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="city">Cidade *</label>
+        <input id="city" type="text" pInputText [(ngModel)]="newLead.city" placeholder="Uberlândia" />
+      </div>
+
+      <div class="form-field">
+        <label for="state">Estado *</label>
+        <select id="state" class="filter-select" [(ngModel)]="newLead.state">
+          <option value="" disabled>Selecione o estado</option>
+          <option *ngFor="let estado of estados" [value]="estado.sigla">
+            {{ estado.sigla }} - {{ estado.nome }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+  
+  <!-- STEP 2: Propriedades -->
+  <div class="dialog-content" *ngIf="dialogStep === 'properties'">
+    <p class="step-description">
+      <i class="pi pi-info-circle"></i>
+      Adicione as propriedades do lead para calcular automaticamente o <strong>score de prioridade</strong>. 
+      Cada propriedade representa uma área com uma cultura específica. 
+      Se o produtor cultiva múltiplas culturas na mesma área, adicione uma propriedade para cada cultura.
+    </p>
+    
+    <div class="properties-form">
+      <h4><i class="pi pi-plus-circle"></i> Nova Propriedade</h4>
+      <div class="form-grid-properties">
+        <div class="form-field">
+          <label for="prop-crop">Cultura Principal *</label>
+          <select id="prop-crop" class="filter-select" [(ngModel)]="newProperty.crop">
+            <option value="soja">🌱 Soja</option>
+            <option value="milho">🌽 Milho</option>
+            <option value="algodao">☁️ Algodão</option>
+          </select>
+          <small class="field-hint">Uma cultura por propriedade</small>
+        </div>
+        
+        <div class="form-field">
+          <label for="prop-area">Área (hectares) *</label>
+          <input id="prop-area" type="number" pInputText [(ngModel)]="newProperty.areaHectares" 
+                 placeholder="Ex: 250.5" min="0.01" step="0.01" />
+          <small class="field-hint">Score aumenta com áreas maiores</small>
+        </div>
+        
+        <div class="form-field">
+          <label for="prop-city">Cidade</label>
+          <input id="prop-city" type="text" pInputText [(ngModel)]="newProperty.city" 
+                 placeholder="Mesma do lead" />
+        </div>
+        
+        <div class="form-field">
+          <label for="prop-state">Estado</label>
+          <select id="prop-state" class="filter-select" [(ngModel)]="newProperty.state">
+            <option value="">Mesmo do lead</option>
+            <option *ngFor="let estado of estados" [value]="estado.sigla">
+              {{ estado.sigla }}
+            </option>
+          </select>
+        </div>
+      </div>
+      
+      <button pButton label="Adicionar Propriedade" icon="pi pi-plus" 
+              class="p-button-success mt-3" (click)="addProperty()" 
+              style="width: 100%;"></button>
+    </div>
+    
+    <!-- Lista de Propriedades Adicionadas -->
+    <div class="properties-list mt-4" *ngIf="tempProperties.length > 0">
+      <h4>
+        <i class="pi pi-check-circle"></i> 
+        Propriedades Adicionadas ({{ tempProperties.length }})
+      </h4>
+      
+      <div class="properties-summary">
+        <div class="summary-card">
+          <i class="pi pi-map"></i>
+          <div class="summary-info">
+            <strong>{{ getTotalArea() }}</strong>
+            <span>hectares totais</span>
+          </div>
+        </div>
+        <div class="summary-card">
+          <i class="pi pi-star-fill"></i>
+          <div class="summary-info">
+            <strong>{{ getEstimatedScore() }}</strong>
+            <span>score estimado</span>
+          </div>
+        </div>
+        <div class="summary-card" *ngIf="getTotalArea() > 100">
+          <i class="pi pi-trophy"></i>
+          <div class="summary-info">
+            <strong>VIP</strong>
+            <span>lead prioritário</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="property-item" *ngFor="let prop of tempProperties; let i = index">
+        <div class="property-info">
+          <strong>{{ getCropLabel(prop.crop) }}</strong> - {{ prop.areaHectares }} ha
+          <span class="property-location">{{ prop.city }}, {{ prop.state }}</span>
+        </div>
+        <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" 
+                (click)="removeProperty(i)" pTooltip="Remover propriedade"></button>
+      </div>
+    </div>
+    
+    <div class="no-properties-message" *ngIf="tempProperties.length === 0">
+      <i class="pi pi-info-circle"></i>
+      <p>Nenhuma propriedade adicionada ainda. Você pode pular esta etapa e adicionar depois.</p>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <!-- Footer Step 1 -->
+    <div *ngIf="dialogStep === 'lead'" class="dialog-footer-buttons">
+      <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text" 
+              (click)="displayDialog = false"></button>
+      <button pButton label="Próximo: Propriedades" icon="pi pi-arrow-right" iconPos="right"
+              class="p-button-primary" (click)="saveLead()"></button>
+    </div>
+    
+    <!-- Footer Step 2 -->
+    <div *ngIf="dialogStep === 'properties'" class="dialog-footer-buttons">
+      <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text" 
+              (click)="cancelPropertyStep()"></button>
+      <button pButton [label]="tempProperties.length > 0 ? 'Concluir' : 'Pular e Concluir'" 
+              icon="pi pi-check" class="p-button-primary" (click)="finishLeadCreation()"></button>
+    </div>
+  </ng-template>
+</p-dialog>

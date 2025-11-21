@@ -1,0 +1,47 @@
+.mobile-menu-btn {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 998;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  
+  i {
+    font-size: 1.5rem;
+  }
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  @media (min-width: 1025px) {
+    display: none;
+  }
+}
+
+.main-content {
+  margin-left: 260px;
+  min-height: 100vh;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--app-bg);
+  
+  @media (max-width: 1024px) {
+    margin-left: 0;
+    padding-top: 0.5rem;
+  }
+}

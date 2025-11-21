@@ -1,0 +1,448 @@
+
+:host {
+  display: block;
+  background: var(--app-bg);
+  min-height: 100vh;
+  padding: 2rem;
+  transition: background 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  animation: slideDown 0.5s ease-out;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-content {
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.02em;
+      
+      @media (max-width: 768px) {
+        font-size: 1.5rem;
+      }
+    }
+    
+    .subtitle {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    
+    @media (max-width: 768px) {
+      width: 100%;
+      
+      button {
+        flex: 1;
+      }
+    }
+
+    button {
+      height: 44px;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+    }
+  }
+}
+
+.loading-container {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.skeleton-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  
+  ::ng-deep .p-skeleton {
+    animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    background: var(--hover-bg);
+  }
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+  }
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border-hover);
+  }
+  
+  ::ng-deep .p-card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    height: 100%;
+  }
+  
+  ::ng-deep .p-card-content {
+    padding: 1.5rem;
+  }
+}
+
+.kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  
+  .kpi-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .kpi-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    background: var(--active-bg);
+    color: var(--primary-color);
+  }
+}
+
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  
+  @media (max-width: 768px) {
+    font-size: 1.75rem;
+  }
+}
+
+.kpi-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  
+  &.positive {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+  }
+  
+  &.negative {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+  }
+  
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.chart-card {
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  ::ng-deep .p-card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    height: 100%;
+  }
+  
+  ::ng-deep .p-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.01em;
+  }
+  
+  ::ng-deep .p-card-subtitle {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  
+  ::ng-deep .p-card-content {
+    padding: 1.25rem;
+  }
+  
+  &.col-6 {
+    grid-column: span 6;
+    
+    @media (max-width: 1024px) {
+      grid-column: span 12;
+    }
+  }
+  
+  &.col-4 {
+    grid-column: span 4;
+    
+    @media (max-width: 1024px) {
+      grid-column: span 6;
+    }
+    
+    @media (max-width: 768px) {
+      grid-column: span 12;
+    }
+  }
+  
+  &.col-12 {
+    grid-column: span 12;
+  }
+}
+
+.chart-container {
+  position: relative;
+  height: 320px;
+  
+  @media (max-width: 768px) {
+    height: 280px;
+  }
+  
+  canvas {
+    max-height: 100%;
+  }
+}
+
+.tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.table-card {
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  
+  ::ng-deep .p-card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  
+  ::ng-deep .p-datatable {
+    .p-datatable-thead > tr > th {
+      background: var(--hover-bg);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.8125rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: none;
+      padding: 0.875rem 1rem;
+    }
+    
+    .p-datatable-tbody > tr {
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: var(--hover-bg);
+      }
+      
+      > td {
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.875rem 1rem;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+      }
+    }
+  }
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  
+  &.gold {
+    background: var(--gradient-warning);
+    color: white;
+  }
+  
+  &.silver {
+    background: linear-gradient(135deg, #CBD5E1, #94A3B8);
+    color: white;
+  }
+  
+  &.bronze {
+    background: linear-gradient(135deg, #FB923C, #F97316);
+    color: white;
+  }
+  
+  &.default {
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+  }
+}
+
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: var(--active-bg);
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  
+  i {
+    font-size: 0.6875rem;
+  }
+}
+
+.funnel-score-card {
+  border-radius: 16px;
+  background: var(--gradient-primary);
+  color: white;
+  overflow: hidden;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+  }
+  
+  ::ng-deep .p-card {
+    background: transparent;
+    border: none;
+    box-shadow: var(--shadow-lg);
+  }
+  
+  ::ng-deep .p-card-content {
+    position: relative;
+    z-index: 1;
+  }
+  
+  ::ng-deep .p-card-title {
+    color: white;
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.score-display {
+  text-align: center;
+  padding: 1.5rem;
+  
+  .score-value {
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    letter-spacing: -0.02em;
+    
+    @media (max-width: 768px) {
+      font-size: 2.75rem;
+    }
+  }
+  
+  .score-label {
+    font-size: 0.9375rem;
+  }}

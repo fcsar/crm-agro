@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: crm-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: crm_user
+      POSTGRES_PASSWORD: crm_pass
+      POSTGRES_DB: crm_agro
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: crm-backend
+    restart: always
+    env_file: .env
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: crm_user
+      DATABASE_PASSWORD: crm_pass
+      DATABASE_NAME: crm_agro
+
+volumes:
+  pgdata:

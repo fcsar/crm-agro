@@ -1,0 +1,66 @@
+<!-- Overlay para mobile -->
+<div class="sidebar-overlay" 
+     [class.active]="isMobileOpen" 
+     (click)="closeMobileSidebar()"></div>
+
+<aside class="sidebar" [class.collapsed]="isCollapsed" [class.mobile-open]="isMobileOpen">
+  <!-- Logo -->
+  <div class="sidebar-header">
+    <div class="logo">
+      <i class="pi pi-cloud"></i>
+      <span class="logo-text" *ngIf="!isCollapsed">CRM Agro</span>
+    </div>
+    <button class="collapse-btn" (click)="toggleSidebar()" *ngIf="!isCollapsed">
+      <i class="pi" [ngClass]="isMobile() ? 'pi-times' : 'pi-chevron-left'"></i>
+    </button>
+  </div>
+
+  <!-- User Profile -->
+  <div class="user-profile" *ngIf="!isCollapsed">
+    <div class="avatar">
+      <img src="https://i.pravatar.cc/150?img=33" alt="User Avatar">
+      <span class="status-indicator"></span>
+    </div>
+    <div class="user-info">
+      <h4>Francisco César</h4>
+      <p>Admin</p>
+    </div>
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="sidebar-nav">
+    <div class="menu-section" *ngFor="let section of menuSections">
+      <div class="section-title" *ngIf="!isCollapsed">{{ section.title }}</div>
+      <ul class="menu-items">
+        <li *ngFor="let item of section.items">
+          <a 
+            [routerLink]="item.route" 
+            routerLinkActive="active"
+            [title]="isCollapsed ? item.label : ''"
+            (click)="closeMobileSidebar()"
+            class="menu-link">
+            <i [class]="item.icon"></i>
+            <span class="menu-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+            <span class="badge" *ngIf="item.badge && !isCollapsed">{{ item.badge }}</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Bottom Menu -->
+  <div class="sidebar-footer">
+    <!-- Dark Mode Toggle -->
+    <div class="theme-toggle">
+      <button (click)="toggleDarkMode()" class="theme-btn" [title]="isDarkMode ? 'Modo Claro' : 'Modo Escuro'">
+        <i [class]="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'"></i>
+        <span *ngIf="!isCollapsed">{{ isDarkMode ? 'Modo Claro' : 'Modo Escuro' }}</span>
+      </button>
+    </div>
+
+    <!-- Collapse Button (quando collapsed) -->
+    <button class="expand-btn" (click)="toggleSidebar()" *ngIf="isCollapsed">
+      <i class="pi pi-chevron-right"></i>
+    </button>
+  </div>
+</aside>

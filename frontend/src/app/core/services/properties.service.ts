@@ -21,6 +21,13 @@ export interface CreatePropertyDto {
   areaHectares: number;
   city: string;
   state: string;
+  geometry?: string;
+}
+
+export interface KmlUploadResponse {
+  geometry: any;
+  areaHectares: number;
+  geojsonString: string;
 }
 
 export interface UpdatePropertyDto {
@@ -49,6 +56,7 @@ export interface PropertyFilters {
   crop?: 'soja' | 'milho' | 'algodao';
   city?: string;
   state?: string;
+  search?: string;
 }
 
 export interface LeadInsights {
@@ -123,5 +131,11 @@ export class PropertiesService {
 
   getHotspots(): Observable<GeographicHotspot[]> {
     return this.http.get<GeographicHotspot[]>(`${this.apiUrl}/analytics/hotspots`);
+  }
+
+  uploadKml(file: File): Observable<KmlUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<KmlUploadResponse>(`${this.apiUrl}/upload-kml`, formData);
   }
 }

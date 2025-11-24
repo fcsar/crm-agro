@@ -16,14 +16,13 @@
     <div class="filters-grid">
       <div class="search-field">
         <span class="p-input-icon-left">
-          <i class="pi pi-search"></i>
           <input 
             type="text" 
             pInputText 
-            placeholder="Buscar por nome ou proprietário..."
+            placeholder="Buscar por cultura, cidade ou estado..."
             [(ngModel)]="searchTerm"
             (input)="applyFilters()"
-            class="w-full"
+            class="search-input"
           />
         </span>
       </div>
@@ -35,8 +34,11 @@
     <p-table 
       [value]="filteredProperties" 
       [loading]="loading"
+      [lazy]="true"
+      (onLazyLoad)="onPageChange($event)"
       [paginator]="true" 
-      [rows]="10"
+      [rows]="pageSize"
+      [totalRecords]="totalRecords"
       [rowsPerPageOptions]="[10, 25, 50]"
       [showCurrentPageReport]="true"
       currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} propriedades"
@@ -46,9 +48,15 @@
       <ng-template pTemplate="header">
         <tr>
           <th>Cultura</th>
-          <th>Área (ha)</th>
+          <th pSortableColumn="areaHectares">
+            Área (ha) 
+            <p-sortIcon field="areaHectares"></p-sortIcon>
+          </th>
           <th>Localização</th>
-          <th>Score Agronômico</th>
+          <th pSortableColumn="agronomicScore">
+            Score Agronômico 
+            <p-sortIcon field="agronomicScore"></p-sortIcon>
+          </th>
           <th class="actions-column">Ações</th>
         </tr>
       </ng-template>
@@ -79,14 +87,6 @@
               pTooltip="Visualizar"
               tooltipPosition="top"
               (click)="viewProperty(property)"
-            ></button>
-            <button 
-              pButton 
-              icon="pi pi-pencil" 
-              class="p-button-rounded p-button-text p-button-sm"
-              pTooltip="Editar"
-              tooltipPosition="top"
-              (click)="editProperty(property)"
             ></button>
             <button 
               pButton 
@@ -123,6 +123,12 @@
   
   <div class="dialog-content">
     <div class="form-grid">
+      <div class="form-field full-width">
+        <app-kml-upload 
+          (kmlProcessed)="onKmlProcessed($event)">
+        </app-kml-upload>
+      </div>
+
       <div class="form-field full-width">
         <label for="leadId">Lead *</label>
         <select id="leadId" class="filter-select" [(ngModel)]="newProperty.leadId" [disabled]="loadingLeads">

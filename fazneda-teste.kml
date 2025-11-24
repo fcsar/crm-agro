@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Fazenda Teste</name>
+    <Placemark>
+      <name>Talhão 01 - Fazenda Teste</name>
+      <description>Área de teste para importação KML &amp; cálculo de hectares</description>
+      <Style>
+        <LineStyle>
+          <color>ff0000ff</color>
+          <width>2</width>
+        </LineStyle>
+        <PolyStyle>
+          <color>7f00ff00</color>
+        </PolyStyle>
+      </Style>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>
+              -47.950000,-19.750000,0
+              -47.950000,-19.760000,0
+              -47.940000,-19.760000,0
+              -47.940000,-19.750000,0
+              -47.950000,-19.750000,0
+            </coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+  </Document>
+</kml>

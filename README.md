@@ -1,158 +1,276 @@
-# CRM Agro
+# CRM Agro - Sistema de Gestão de Leads Inteligente
 
-Sistema de CRM especializado para o agronegócio, com gestão inteligente de leads, propriedades rurais e sistema de priorização baseado em área cultivada.
+Sistema de gerenciamento de leads para distribuidores de fertilizantes, desenvolvido com NestJS (backend) e Angular (frontend).
+
+**Diferencial:** CRM com **inteligência comercial agronômica** - vai além do CRUD genérico e entende o negócio agrícola.
+
+## ✨ Features Inovadoras
+
+### 🌾 Módulo de Propriedades (Property-Driven CRM)
+
+**Transformamos área produtiva em inteligência comercial:**
+
+1. **Lead Score Agronômico** - Score baseado em `área × peso_da_cultura`
+2. **Agrupamento por Cultura** - Mix automático: Soja 70%, Milho 20%, Algodão 10%
+3. **Potencial de Expansão** - Detecta produtores em crescimento
+4. **Hotspots Geográficos** - Identifica regiões estratégicas
+5. **Mix de Culturas** - Percentual de cada cultura
+6. **Validação de Qualidade** - Alertas automáticos de inconsistências
+7. **Checklist de Conversão** - Sugestões práticas para vendedor
+8. **Timeline Agrícola** - Timing ideal de contato (plantio/adubação/colheita)
+9. **Alertas para Vendedores** - Notificações inteligentes
+
+📚 **Documentação Completa:**
+
+- [Features Detalhadas](./docs/PROPERTIES_FEATURES.md)
+- [Exemplos de Uso](./docs/PROPERTIES_USAGE_EXAMPLES.md)
+- [Quick Start](./docs/PROPERTIES_QUICKSTART.md)
+
+---
 
 ## 🚀 Tecnologias
 
 ### Backend
+
 - **NestJS** - Framework Node.js
-- **TypeScript** - Linguagem
+- **TypeORM** - ORM para PostgreSQL
 - **PostgreSQL** - Banco de dados
-- **TypeORM** - ORM
-- **Swagger** - Documentação da API
+- **Class Validator** - Validação de dados
+- **Jest** - Testes unitários e e2e
 
 ### Frontend
-- **Angular 18** - Framework
+
+- **Angular 19** - Framework frontend
 - **PrimeNG** - Biblioteca de componentes UI
-- **TypeScript** - Linguagem
-- **SCSS** - Estilização
+- **RxJS** - Programação reativa
 
 ## 📋 Pré-requisitos
 
-- Node.js 18+ 
-- Docker e Docker Compose
-- Git
+- Node.js (v18 ou superior)
+- npm ou yarn
+- Docker e Docker Compose (para rodar o banco de dados)
 
-## 🐳 Instalação e Execução com Docker
+## 🔧 Instalação
 
-### 1. Clone o repositório
-
-```bash
-git clone https://github.com/fcsar/crm-agro.git
-cd crm-agro
-```
-
-### 2. Inicie os containers
+### 1. Clone o repositório e instale as dependências
 
 ```bash
-docker-compose up -d
-```
-
-Isso irá iniciar:
-- **PostgreSQL** na porta `5432`
-- **Backend (NestJS)** na porta `3000`
-
-### 3. Acesse a aplicação
-
-- **API Backend**: http://localhost:3000
-- **Swagger Docs**: http://localhost:3000/api/docs
-
-## 💻 Execução Local (Sem Docker)
-
-### Backend
-
-```bash
-cd backend
+# Instalar dependências do monorepo
 npm install
+```
+
+### 2. Configure as variáveis de ambiente
+
+O arquivo `.env.example` já está configurado na raiz do projeto. Para uso em desenvolvimento, crie um arquivo `.env`:
+
+```bash
 cp .env.example .env
+```
+
+Conteúdo do `.env`:
+
+```env
+# Database
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=crm_user
+DATABASE_PASSWORD=crm_pass
+DATABASE_NAME=crm_agro
+
+# API
+PORT=3000
+NODE_ENV=development
+```
+
+### 3. Inicie o banco de dados
+
+```bash
+# Sobe o PostgreSQL via Docker
+docker-compose up -d postgres
+```
+
+Verifique se o banco está rodando:
+
+```bash
+docker ps
+```
+
+### 4. Inicie o backend
+
+```bash
+# Via workspace
+npm run dev:backend
+
+# Ou diretamente na pasta backend
+cd backend
 npm run start:dev
 ```
 
-### Frontend
+O backend estará disponível em: `http://localhost:3000`
+
+### 5. Inicie o frontend
 
 ```bash
+# Em outro terminal
+npm run dev:frontend
+
+# Ou diretamente na pasta frontend
 cd frontend
-npm install
 npm start
 ```
 
-Acesse: http://localhost:4200
+O frontend estará disponível em: `http://localhost:4200`
 
-## 🗄️ Banco de Dados
+## 📚 API Endpoints
 
-O PostgreSQL é iniciado automaticamente via Docker. As migrations são executadas na primeira inicialização.
+### Properties (Propriedades Rurais) ⭐
 
-### Configuração manual do banco
+| Método | Endpoint                               | Descrição                              |
+| ------ | -------------------------------------- | -------------------------------------- |
+| POST   | `/properties`                          | Criar propriedade                      |
+| GET    | `/properties`                          | Listar com filtros e paginação         |
+| GET    | `/properties/:id`                      | Buscar uma propriedade                 |
+| PATCH  | `/properties/:id`                      | Atualizar propriedade                  |
+| DELETE | `/properties/:id`                      | Remover propriedade                    |
+| GET    | `/properties/lead/:leadId/insights` ⭐ | **Insights completos do lead**         |
+| GET    | `/properties/analytics/hotspots` ⭐    | **Distribuição geográfica (hotspots)** |
 
-```bash
-cd backend
-npm run typeorm migration:run
-npm run typeorm migration:revert
+#### Exemplo: Criar Propriedade
+
+```json
+{
+  "leadId": "uuid",
+  "crop": "soja",
+  "areaHectares": 250.5,
+  "city": "Uberlândia",
+  "state": "MG"
+}
 ```
 
-## 📚 Funcionalidades
+#### Culturas disponíveis:
 
-### Dashboard
-- Visão geral de métricas de leads
-- Gráficos de status, origem e segmentação
-- Distribuição geográfica
-- Funil de conversão
+- `soja` - Peso 1.0 (baseline)
+- `milho` - Peso 0.7 (menor consumo)
+- `algodao` - Peso 1.3 (maior consumo de insumos)
 
-### Gestão de Leads
-- Cadastro completo de leads
-- Sistema de priorização inteligente baseado em:
-  - Área total de cultivo (> 100ha = VIP)
-  - Origem do lead (indicação, feira)
-  - Status no funil de vendas
-- Filtros avançados
-- Atualização de status em tempo real
-- Busca por nome, email ou CPF
+#### Exemplo: Insights Completos ⭐
 
-### Propriedades Rurais
-- Cadastro de propriedades por lead
-- Culturas: Soja, Milho, Algodão
-- Cálculo automático de:
-  - Área total do lead
-  - Culturas principais
-  - Score de prioridade
-  - Classificação VIP (> 100ha)
+```bash
+GET /properties/lead/:leadId/insights
+```
 
-### Cadastro Multi-Step
-- **Passo 1**: Dados do lead
-- **Passo 2**: Adicionar propriedades (opcional)
-- Cálculo de score em tempo real
-- Visualização de impacto das propriedades
+Retorna:
 
-## 🎯 Sistema de Priorização
+```json
+{
+  "totalProperties": 3,
+  "totalArea": 400,
+  "totalAgronomicScore": 435,
+  "isPriority": true,
+  "cropMix": [{ "crop": "soja", "totalArea": 250, "percentage": 62.5 }],
+  "mainCrop": "soja",
+  "actionSuggestions": [
+    "Oferecer plano premium para grandes produtores (200+ ha)",
+    "Algodão: alta demanda de insumos — campanha prioritária de NPK"
+  ],
+  "cropSeasonInsight": "soja: período de plantio",
+  "expansionPotential": true,
+  "cities": ["Uberlândia"]
+}
+```
 
-O score de prioridade é calculado automaticamente:
+### Leads
 
-| Critério | Pontos |
-|----------|--------|
-| Área > 100ha | +50 |
-| Área 50-100ha | +30 |
-| Área > 0ha | +10 |
-| Origem: Indicação | +20 |
-| Origem: Feira | +15 |
-| Status: Negociação | +20 |
-| Status: Proposta | +15 |
-| Status: Qualificado | +10 |
-| Sem vendedor | +5 |
+| Método | Endpoint              | Descrição                       |
+| ------ | --------------------- | ------------------------------- |
+| GET    | `/leads`              | Lista leads com filtros         |
+| GET    | `/leads/:id`          | Busca lead por ID               |
+| GET    | `/leads/prioritarios` | Lista prioritários (> 100 ha)   |
+| POST   | `/leads`              | Cria novo lead                  |
+| PATCH  | `/leads/:id`          | Atualiza lead                   |
+| DELETE | `/leads/:id`          | Remove lead                     |
+| PATCH  | `/leads/:id/status`   | Atualiza status                 |
+| POST   | `/leads/:id/comments` | Adiciona comentário (histórico) |
+| GET    | `/leads/:id/comments` | Lista comentários (paginado)    |
 
-**Lead VIP**: Área total > 100 hectares
+#### Exemplo: Criar Lead
 
-## 🔧 Scripts Disponíveis
+```json
+{
+  "name": "João Silva",
+  "email": "joao@example.com",
+  "cpf": "123.456.789-00",
+  "phone": "(31) 99999-9999",
+  "city": "Uberlândia",
+  "state": "MG",
+  "status": "novo",
+  "origin": "feira"
+}
+```
+
+**⚠️ IMPORTANTE:** Campos `totalAreaHectares`, `mainCrops` e `isPrioritario` são **calculados automaticamente** com base nas propriedades.
+
+Para definir área e culturas:
+
+1. Crie o lead (sem área)
+2. Adicione propriedades via `POST /properties`
+3. Campos serão atualizados automaticamente
+
+**Campos calculados automaticamente:**
+
+- `totalAreaHectares` - Soma de todas as propriedades (read-only)
+- `mainCrops` - Array de culturas únicas (read-only)
+- `isPrioritario` - true se área total > 100 ha (read-only)
+- `priorityScore` - Score calculado com base em área, cultura, origem e status
+- `segment` - Pequeno (< 50 ha), Médio (50-100 ha), Grande (> 100 ha)
+
+📚 **Leia mais:** [Single Source of Truth](./docs/REFACTORING_SINGLE_SOURCE_OF_TRUTH.md)
+
+### Status disponíveis:
+
+- `novo`
+- `contatado`
+- `qualificado`
+- `proposta`
+- `negociacao`
+- `ganho`
+- `perdido`
+
+## 🧪 Testes
 
 ### Backend
 
 ```bash
-npm run start:dev      # Desenvolvimento com hot-reload
-npm run start:prod     # Produção
-npm run build          # Build
-npm run test           # Testes unitários
-npm run test:e2e       # Testes E2E
-npm run lint           # Linter
-npm run format         # Formatar código
+# Testes unitários
+cd backend
+npm test
+
+# Testes com coverage
+npm run test:cov
+
+# Testes e2e
+npm run test:e2e
+
+# Watch mode
+npm run test:watch
 ```
 
-### Frontend
+## 🐳 Docker
+
+### Comandos úteis do Docker Compose
 
 ```bash
-npm start              # Desenvolvimento (porta 4200)
-npm run build          # Build produção
-npm run build:ssr      # Build com SSR
-npm run test           # Testes unitários
-npm run lint           # Linter
+# Subir todos os serviços
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Parar serviços
+docker-compose down
+
+# Parar e remover volumes (apaga dados do banco)
+docker-compose down -v
 ```
 
 ## 📁 Estrutura do Projeto
@@ -161,119 +279,240 @@ npm run lint           # Linter
 crm-agro/
 ├── backend/
 │   ├── src/
-│   │   ├── leads/           # Módulo de leads
-│   │   ├── properties/      # Módulo de propriedades
-│   │   ├── dashboard/       # Módulo de dashboard
-│   │   ├── common/          # Utilitários compartilhados
-│   │   └── main.ts          # Entry point
-│   ├── test/                # Testes
-│   └── package.json
-│
+│   │   ├── leads/
+│   │   │   ├── dto/
+│   │   │   │   ├── create-lead.dto.ts
+│   │   │   │   ├── update-lead.dto.ts
+│   │   │   │   ├── filter-leads.dto.ts
+│   │   │   │   ├── lead-summary.dto.ts
+│   │   │   │   ├── update-lead-status.dto.ts
+│   │   │   │   └── create-lead-comment.dto.ts
+│   │   │   ├── lead.entity.ts
+│   │   │   ├── lead-comment.entity.ts
+│   │   │   ├── leads.controller.ts
+│   │   │   ├── leads.service.ts
+│   │   │   ├── leads.service.spec.ts
+│   │   │   └── leads.module.ts
+│   │   ├── properties/                     ⭐ NOVO
+│   │   │   ├── dto/
+│   │   │   │   ├── create-property.dto.ts
+│   │   │   │   ├── update-property.dto.ts
+│   │   │   │   ├── filter-properties.dto.ts
+│   │   │   │   └── property-summary.dto.ts
+│   │   │   ├── property.entity.ts
+│   │   │   ├── property.enums.ts
+│   │   │   ├── properties.controller.ts
+│   │   │   ├── properties.service.ts
+│   │   │   ├── properties.service.spec.ts
+│   │   │   └── properties.module.ts
+│   │   ├── common/
+│   │   │   ├── dto/
+│   │   │   │   └── pagination.dto.ts
+│   │   │   ├── filters/
+│   │   │   │   ├── http-exception.filter.ts
+│   │   │   │   └── all-exceptions.filter.ts
+│   │   │   └── interceptors/
+│   │   │       └── transform.interceptor.ts
+│   │   ├── app.module.ts
+│   │   └── main.ts
+│   └── test/
 ├── frontend/
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── core/        # Services, guards, interceptors
-│   │   │   ├── features/    # Módulos de funcionalidades
-│   │   │   ├── shared/      # Componentes compartilhados
-│   │   │   └── environments/
-│   │   └── index.html
-│   └── package.json
-│
+│   └── src/
+├── docs/                                    ⭐ DOCUMENTAÇÃO
+│   ├── PROPERTIES_FEATURES.md              - 9 features inovadoras
+│   ├── PROPERTIES_USAGE_EXAMPLES.md        - Cenários de uso
+│   ├── PROPERTIES_IMPLEMENTATION.md        - Detalhes técnicos
+│   ├── PROPERTIES_QUICKSTART.md            - Guia rápido
+│   ├── EXCEPTION_HANDLING.md
+│   ├── ARCHITECTURE_CONTEXT.md
+│   └── IMPLEMENTATION_SUMMARY.md
 ├── docker-compose.yml
-└── README.md
+├── .env.example
+├── .env
+└── package.json
 ```
 
-## 🌐 Variáveis de Ambiente
+## 🔍 Validações
 
-### Backend (.env)
+O sistema implementa validações robustas:
 
-```env
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASSWORD=postgres
-DATABASE_NAME=crm_agro
-PORT=3000
-NODE_ENV=development
+- **Email único**: Não permite emails duplicados
+- **Campos obrigatórios**: Nome e email são obrigatórios
+- **Estado**: Deve ter exatamente 2 caracteres em maiúsculas (ex: MG)
+- **Telefone**: Validação com regex (10 ou 11 dígitos numéricos)
+- **Status**: Apenas valores enum válidos
+- **UUID**: Validação automática de IDs nos endpoints
+
+## 🛡️ Tratamento de Exceções
+
+A API segue os padrões REST para tratamento de erros:
+
+### Códigos HTTP
+
+| Código | Descrição             | Quando ocorre                         |
+| ------ | --------------------- | ------------------------------------- |
+| 200    | OK                    | Operação bem-sucedida (GET, PATCH)    |
+| 201    | Created               | Recurso criado com sucesso (POST)     |
+| 204    | No Content            | Recurso removido com sucesso (DELETE) |
+| 400    | Bad Request           | Dados inválidos ou ID malformado      |
+| 404    | Not Found             | Lead não encontrado                   |
+| 409    | Conflict              | Email já cadastrado                   |
+| 500    | Internal Server Error | Erro interno do servidor              |
+
+### Formato de Erro Padronizado
+
+```json
+{
+  "statusCode": 404,
+  "timestamp": "2025-11-18T10:30:00.000Z",
+  "path": "/leads/123",
+  "method": "GET",
+  "message": "Lead com ID '123' não foi encontrado no sistema",
+  "error": "Not Found"
+}
 ```
 
-### Frontend (environment.ts)
+### Exemplos de Erros
 
-```typescript
-export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:3000',
-};
+**Validação (400):**
+
+```json
+{
+  "statusCode": 400,
+  "message": "Validation failed",
+  "errors": [
+    {
+      "field": "email",
+      "errors": ["Email inválido. Use o formato: exemplo@email.com"]
+    }
+  ]
+}
 ```
 
-## 🧪 Testes
+**Email Duplicado (409):**
 
-```bash
-# Backend
-cd backend
-npm run test        # Unit tests
-npm run test:e2e    # E2E tests
-npm run test:cov    # Coverage
-
-# Frontend
-cd frontend
-npm run test        # Unit tests com Karma
+```json
+{
+  "statusCode": 409,
+  "message": "O email joao@example.com já está cadastrado no sistema",
+  "error": "Conflict"
+}
 ```
 
-## 📝 API Documentation
+📚 **Documentação completa:** [EXCEPTION_HANDLING.md](./docs/EXCEPTION_HANDLING.md)
 
-Após iniciar o backend, acesse a documentação Swagger:
+## 📝 Logs
 
-**http://localhost:3000/api/docs**
+O sistema implementa logging estruturado:
 
-Principais endpoints:
+- **INFO**: Operações bem-sucedidas
+- **WARN**: Tentativas suspeitas (ex: email duplicado)
+- **ERROR**: Erros reais com stack trace
 
-- `GET /leads` - Listar leads
-- `POST /leads` - Criar lead
-- `PATCH /leads/:id/status` - Atualizar status
-- `GET /properties` - Listar propriedades
-- `POST /properties` - Criar propriedade
-- `GET /dashboard/overview` - Métricas do dashboard
+Exemplo:
 
-## 🤝 Contribuindo
+```
+[LeadsService] Lead criado com sucesso: 123e4567-e89b-12d3-a456-426614174000
+[LeadsService] Tentativa de criar lead com email duplicado: joao@example.com
+[HttpExceptionFilter] POST /leads - Status: 409 - Message: Email já cadastrado
+```
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feat/nova-feature`)
-3. Commit suas mudanças (`git commit -m 'feat: adiciona nova feature'`)
-4. Push para a branch (`git push origin feat/nova-feature`)
-5. Abra um Pull Request
+## 📚 Documentação Adicional
 
-### Conventional Commits
+### Módulo de Propriedades ⭐
 
-Este projeto segue o padrão de [Conventional Commits](https://www.conventionalcommits.org/):
+- [Features Inovadoras](./docs/PROPERTIES_FEATURES.md) - 9 features de inteligência comercial
+- [Exemplos de Uso](./docs/PROPERTIES_USAGE_EXAMPLES.md) - Cenário completo com João Silva
+- [Implementação Técnica](./docs/PROPERTIES_IMPLEMENTATION.md) - Detalhes de código
+- [Quick Start](./docs/PROPERTIES_QUICKSTART.md) - Teste em 5 minutos
 
-- `feat:` Nova funcionalidade
-- `fix:` Correção de bug
-- `docs:` Documentação
-- `style:` Formatação de código
-- `refactor:` Refatoração
-- `test:` Testes
-- `chore:` Tarefas de build/config
+### Arquitetura e Padrões
 
-## 📄 Licença
+- [Arquitetura do Projeto](./docs/ARCHITECTURE_CONTEXT.md)
+- [Tratamento de Exceções](./docs/EXCEPTION_HANDLING.md)
+- [Resumo da Implementação](./docs/IMPLEMENTATION_SUMMARY.md)
 
-MIT
+---
 
-## 👨‍💻 Autor
+## 🎯 Diferenciais do Projeto
 
-Francisco Cesar - [GitHub](https://github.com/fcsar)
+### 1. **Visão de Negócio Agro**
 
-## 🔥 Features Principais
+Não é um CRUD genérico. O sistema entende que:
 
-- ✅ Sistema de priorização inteligente
-- ✅ Cálculo automático de score
-- ✅ Gestão de propriedades rurais
-- ✅ Multi-step forms
-- ✅ Filtros avançados
-- ✅ Dashboard com métricas
-- ✅ Atualização em tempo real
-- ✅ Responsivo (mobile-first)
-- ✅ Dark mode
-- ✅ Validações robustas
-- ✅ Error handling com Toast
-- ✅ Documentação Swagger
+- Algodão ≠ Soja ≠ Milho (pesos diferentes)
+- Cada cultura tem ciclo específico
+- Área grande ≠ alto potencial (depende da cultura)
+
+### 2. **Inteligência sem IA**
+
+Sugestões automáticas baseadas em regras:
+
+- "Oferecer plano premium para 200+ ha"
+- "Algodão: campanha prioritária de NPK"
+- "Período de adubação — momento ideal para contato"
+
+### 3. **Estratégia Regional**
+
+Hotspots geográficos para planejamento:
+
+- Uberlândia: 14 propriedades
+- Patos de Minas: 9 propriedades
+- **Ação:** Concentrar esforços em Uberlândia
+
+### 4. **Qualidade de Dados**
+
+Alertas automáticos:
+
+- Área < 1 ha → revisar
+- Sem localização → completar
+- Possível duplicata → investigar
+
+### 5. **Timing Comercial**
+
+Timeline agrícola por cultura:
+
+- Soja: plantio (out-dez), adubação (jan-fev)
+- Milho: plantio (set-nov), adubação (nov-jan)
+- **Resultado:** Contato no momento certo
+
+---
+
+## 🚧 Status do Projeto
+
+### ✅ Concluído
+
+- [x] Módulo de Leads completo (CRUD + validações + testes)
+- [x] Módulo de Properties com 9 features inovadoras
+- [x] Sistema de comentários (histórico de interações)
+- [x] Paginação em todos os endpoints de listagem
+- [x] Exception handling robusto (REST patterns)
+- [x] Logging estruturado
+- [x] Testes unitários (9/9 passing)
+- [x] Validações com class-validator
+- [x] Documentação completa (4 arquivos de docs)
+
+### 🚧 Em Desenvolvimento
+
+- [ ] Dashboard com métricas e gráficos
+- [ ] Frontend Angular
+- [ ] Swagger/OpenAPI documentation
+- [ ] Autenticação JWT
+
+### 📋 Backlog
+
+- [ ] Seeds para dados de desenvolvimento
+- [ ] CI/CD pipeline
+- [ ] Integração com mapas (geometry field)
+- [ ] Relatórios PDF
+- [ ] Notificações em tempo real
+
+---
+
+## 📝 Licença
+
+Este projeto faz parte de um teste técnico.
+
+---
+
+**Desenvolvido para o teste técnico CRM Agro**

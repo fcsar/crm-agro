@@ -1,10 +1,9 @@
-import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, Inject, ViewChild } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 
-// PrimeNG
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -17,10 +16,11 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
-// Services
 import { LeadsService, Lead, CreateLeadDto, UpdateLeadStatusDto } from '../../../../core/services/leads.service';
-import { PropertiesService, CreatePropertyDto } from '../../../../core/services/properties.service';
+import { PropertiesService, CreatePropertyDto, KmlUploadResponse } from '../../../../core/services/properties.service';
 import { EstadosBrasilService, Estado } from '../../../../core/services/estados-brasil.service';
+import { STATUS_OPTIONS, STATUS_LABELS, STATUS_SEVERITIES } from '../../../../core/constants/status.constants';
+import { KmlUploadComponent } from '../../../../shared/components/kml-upload/kml-upload.component';
 
 @Component({
   selector: 'app-leads-list',
@@ -38,12 +38,15 @@ import { EstadosBrasilService, Estado } from '../../../../core/services/estados-
     DialogModule,
     ToastModule,
     ConfirmDialogModule,
+    KmlUploadComponent,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './leads-list.component.html',
   styleUrls: ['./leads-list.component.scss']
 })
 export class LeadsListComponent implements OnInit {
+  @ViewChild(KmlUploadComponent) kmlUploadComponent!: KmlUploadComponent;
+  
   leads: Lead[] = [];
   filteredLeads: Lead[] = [];
   loading = true;
@@ -66,19 +69,9 @@ export class LeadsListComponent implements OnInit {
   newProperty: any = this.getEmptyProperty();
   tempProperties: any[] = [];
 
-  // Estados brasileiros
   estados: Estado[] = [];
 
-  statusOptions = [
-    { label: 'Todos', value: '' },
-    { label: 'Novo', value: 'novo' },
-    { label: 'Contatado', value: 'contatado' },
-    { label: 'Qualificado', value: 'qualificado' },
-    { label: 'Proposta', value: 'proposta' },
-    { label: 'Negociação', value: 'negociacao' },
-    { label: 'Ganho', value: 'ganho' },
-    { label: 'Perdido', value: 'perdido' },
-  ];
+  statusOptions = STATUS_OPTIONS;
 
   origemOptions = [
     { label: 'Site', value: 'site' },
@@ -147,7 +140,7 @@ export class LeadsListComponent implements OnInit {
   }
 
   onPageChange(event: any) {
-    this.currentPage = event.page + 1;
+    this.currentPage = (event.first / event.rows) + 1;
     this.pageSize = event.rows;
     this.loadLeads();
   }
@@ -251,40 +244,46 @@ export class LeadsListComponent implements OnInit {
       email: '',
       phone: '',
       origin: 'site',
-      segment: 'medio',
       city: '',
-      state: '',
+      state: 'MG',
     };
   }
 
   getStatusLabel(status: string): string {
-    const labels: { [key: string]: string } = {
-      novo: 'Novo',
-      contatado: 'Contatado',
-      qualificado: 'Qualificado',
-      proposta: 'Proposta',
-      negociacao: 'Negociação',
-      ganho: 'Ganho',
-      perdido: 'Perdido',
-    };
-    return labels[status] || status;
+    return STATUS_LABELS[status as keyof typeof STATUS_LABELS] || status;
   }
 
   getStatusSeverity(status: string): any {
-    const severities: { [key: string]: string } = {
-      novo: 'info',
-      contatado: 'secondary',
-      qualificado: 'warn',
-      proposta: 'info',
-      negociacao: 'warn',
-      ganho: 'success',
-      perdido: 'danger',
-    };
-    return severities[status] || 'secondary';
+    return STATUS_SEVERITIES[status as keyof typeof STATUS_SEVERITIES] || 'secondary';
   }
 
   formatNumber(value: number): string {
     return new Intl.NumberFormat('pt-BR').format(value);
+  }
+
+  updateLeadStatusValue(lead: Lead, newStatus: string) {
+    const oldStatus = lead.status;
+    const updateDto: UpdateLeadStatusDto = { status: newStatus as any };
+    
+    this.leadsService.updateStatus(lead.id, updateDto).subscribe({
+      next: (updatedLead) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: `Status atualizado para ${this.getStatusLabel(newStatus)}`
+        });
+        this.loadLeads();
+      },
+      error: (error) => {
+        console.error('Erro ao atualizar status:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Erro ao atualizar status'
+        });
+        lead.status = oldStatus as any;
+      }
+    });
   }
 
   updateLeadStatus(lead: Lead, event: Event) {
@@ -366,7 +365,8 @@ export class LeadsListComponent implements OnInit {
       crop: this.newProperty.crop,
       areaHectares: this.newProperty.areaHectares,
       city: this.newProperty.city || this.newLead.city!,
-      state: this.newProperty.state || this.newLead.state!
+      state: this.newProperty.state || this.newLead.state!,
+      geometry: this.newProperty.geometry
     };
     
     this.propertiesService.create(propertyDto).subscribe({
@@ -378,6 +378,9 @@ export class LeadsListComponent implements OnInit {
           detail: 'Propriedade adicionada!'
         });
         this.newProperty = this.getEmptyProperty();
+        if (this.kmlUploadComponent) {
+          this.kmlUploadComponent.reset();
+        }
       },
       error: (error) => {
         console.error('Erro ao adicionar propriedade:', error);
@@ -429,6 +432,11 @@ export class LeadsListComponent implements OnInit {
   
   getTotalArea(): number {
     return this.tempProperties.reduce((sum, p) => sum + Number(p.areaHectares), 0);
+  }
+
+  onKmlProcessed(result: KmlUploadResponse) {
+    this.newProperty.areaHectares = result.areaHectares;
+    this.newProperty.geometry = result.geojsonString;
   }
   
   getEstimatedScore(): number {

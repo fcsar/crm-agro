@@ -10,6 +10,9 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -18,16 +21,22 @@ import {
   ApiParam,
   ApiQuery,
   ApiBody,
+  ApiConsumes,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { PropertiesService } from './properties.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { FilterPropertiesDto } from './dto/filter-properties.dto';
+import { KmlProcessorService } from './kml-processor.service';
 
 @ApiTags('properties')
 @Controller('properties')
 export class PropertiesController {
-  constructor(private readonly propertiesService: PropertiesService) {}
+  constructor(
+    private readonly propertiesService: PropertiesService,
+    private readonly kmlProcessorService: KmlProcessorService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -245,5 +254,69 @@ export class PropertiesController {
   @ApiResponse({ status: 404, description: 'Propriedade não encontrada' })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.propertiesService.remove(id);
+  }
+
+  @Post('upload-kml')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload de arquivo KML para calcular área',
+    description:
+      'Recebe um arquivo KML (Google Earth), converte para GeoJSON e calcula a área em hectares automaticamente.',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Arquivo KML do Google Earth',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'KML processado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        geometry: {
+          type: 'object',
+          description: 'GeoJSON Polygon ou MultiPolygon',
+        },
+        areaHectares: {
+          type: 'number',
+          description: 'Área calculada em hectares',
+          example: 125.43,
+        },
+        geojsonString: {
+          type: 'string',
+          description: 'String JSON da geometria para salvar no banco',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Arquivo KML inválido ou vazio',
+  })
+  uploadKml(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('Nenhum arquivo foi enviado');
+    }
+
+    if (!file.originalname.toLowerCase().endsWith('.kml')) {
+      throw new BadRequestException(
+        'Formato de arquivo inválido. Envie um arquivo .kml',
+      );
+    }
+
+    const kmlContent = file.buffer.toString('utf-8');
+    this.kmlProcessorService.validateKmlContent(kmlContent);
+
+    return this.kmlProcessorService.processKmlFile(kmlContent);
   }
 }

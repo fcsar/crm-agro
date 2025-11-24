@@ -134,6 +134,7 @@ export class LeadsService {
 
       const lead = this.leadsRepository.create(leadData);
 
+      lead.segment = this.defineSegment(lead.totalAreaHectares);
       lead.priorityScore = this.calculatePriorityScore(lead);
 
       const savedLead = await this.leadsRepository.save(lead);

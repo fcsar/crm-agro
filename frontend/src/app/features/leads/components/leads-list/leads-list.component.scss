@@ -66,6 +66,38 @@
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
+
+  .search-field {
+    .p-input-icon-left {
+      width: 100%;
+
+      i {
+        color: var(--text-muted);
+        left: 1rem;
+      }
+
+      .search-input {
+        width: 100%;
+        height: 44px;
+        font-size: 0.95rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+        padding-left: 2.75rem;
+
+        &:focus {
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        &::placeholder {
+          color: var(--text-muted);
+        }
+      }
+    }
+  }
 }
 
 .filter-select {
@@ -138,6 +170,10 @@
   }
 }
 
+.p-button-primary {
+  padding: 10px;
+}
+
 .contact-cell {
   display: flex;
   flex-direction: column;
@@ -152,20 +188,7 @@
 
 .action-buttons {
   display: flex;
-  gap: 0.625rem;
-  
-  button {
-    padding: 0.5rem 0.75rem;
-    min-width: 36px;
-    height: 36px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-  }
+  gap: 0.5rem;
 }
 
 .status-select {
@@ -185,28 +208,28 @@
   }
   
   &.status-novo {
-    background: #6366f1;
-    border-color: #4f46e5;
-  }
-  
-  &.status-qualificado {
     background: #3b82f6;
     border-color: #2563eb;
   }
   
-  &.status-proposta {
+  &.status-contatado {
+    background: #6b7280;
+    border-color: #4b5563;
+  }
+  
+  &.status-qualificado {
     background: #f59e0b;
     border-color: #d97706;
   }
   
-  &.status-negociacao {
-    background: #10b981;
-    border-color: #059669;
-  }
-  
-  &.status-contatado {
+  &.status-proposta {
     background: #8b5cf6;
     border-color: #7c3aed;
+  }
+  
+  &.status-negociacao {
+    background: #f97316;
+    border-color: #ea580c;
   }
   
   &.status-ganho {
@@ -444,6 +467,10 @@
     
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
+    }
+
+    .full-width-field {
+      grid-column: 1 / -1;
     }
   }
   

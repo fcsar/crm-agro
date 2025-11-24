@@ -41,4 +41,8 @@ export class FilterPropertiesDto {
   @IsOptional()
   @IsString({ message: 'Estado deve ser texto' })
   state?: string;
+
+  @IsOptional()
+  @IsString({ message: 'Busca deve ser texto' })
+  search?: string;
 }

@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Property } from './property.entity';
-import { Lead } from '../leads/lead.entity';
+import { Lead, LeadSegment } from '../leads/lead.entity';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { FilterPropertiesDto } from './dto/filter-properties.dto';
@@ -249,6 +249,7 @@ export class PropertiesService {
       lead.totalAreaHectares = totalArea;
       lead.mainCrops = JSON.stringify(crops);
       lead.isPrioritario = totalArea > 100;
+      lead.segment = this.defineSegment(totalArea);
 
       lead.priorityScore = this.calculateLeadPriorityScore(lead);
 
@@ -285,6 +286,14 @@ export class PropertiesService {
     return score;
   }
 
+  private defineSegment(totalAreaHectares?: number): LeadSegment | null {
+    if (!totalAreaHectares) return null;
+
+    if (totalAreaHectares < 50) return LeadSegment.PEQUENO;
+    if (totalAreaHectares <= 100) return LeadSegment.MEDIO;
+    return LeadSegment.GRANDE;
+  }
+
   async findAll(
     filters: FilterPropertiesDto,
     paginationDto: PaginationDto,
@@ -299,12 +308,39 @@ export class PropertiesService {
       if (filters.city) where.city = filters.city;
       if (filters.state) where.state = filters.state;
 
-      const [properties, total] = await this.propertiesRepository.findAndCount({
-        where,
-        order: { createdAt: 'DESC' },
-        take: limit,
-        skip,
-      });
+      // Se houver search, cria condições OR para buscar em múltiplos campos
+      let query = this.propertiesRepository
+        .createQueryBuilder('property')
+        .orderBy('property.createdAt', 'DESC')
+        .skip(skip)
+        .take(limit);
+
+      // Aplica filtros específicos
+      if (filters.leadId) {
+        query = query.andWhere('property.leadId = :leadId', {
+          leadId: filters.leadId,
+        });
+      }
+      if (filters.crop) {
+        query = query.andWhere('property.crop = :crop', { crop: filters.crop });
+      }
+      if (filters.city) {
+        query = query.andWhere('property.city = :city', { city: filters.city });
+      }
+      if (filters.state) {
+        query = query.andWhere('property.state = :state', {
+          state: filters.state,
+        });
+      }
+
+      // Aplica busca geral
+      if (filters.search) {
+        query = query.andWhere(
+          '(LOWER(property.city) LIKE LOWER(:search) OR LOWER(property.state) LIKE LOWER(:search) OR LOWER(property.crop::text) LIKE LOWER(:search))',
+          { search: `%${filters.search}%` },
+        );
+      }
+      const [properties, total] = await query.getManyAndCount();
 
       const data = properties.map((p) => this.toSummaryDto(p));
       const totalPages = Math.ceil(total / limit);

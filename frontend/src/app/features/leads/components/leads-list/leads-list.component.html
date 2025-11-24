@@ -14,17 +14,18 @@
   <!-- Filters -->
   <p-card class="filters-card">
     <div class="filters-grid">
-      <span class="p-input-icon-left">
-        <i class="pi pi-search"></i>
-        <input 
-          type="text" 
-          pInputText 
-          placeholder="Buscar por nome, email..." 
-          [(ngModel)]="searchTerm"
-          (input)="applyFilters()"
-          class="w-full"
-        />
-      </span>
+      <div class="search-field">
+        <span class="p-input-icon-left">
+          <input 
+            type="text" 
+            pInputText 
+            placeholder="Buscar por nome ou prioritário..." 
+            [(ngModel)]="searchTerm"
+            (input)="applyFilters()"
+            class="search-input"
+          />
+        </span>
+      </div>
       
       <select 
         class="filter-select"
@@ -43,12 +44,14 @@
     <p-table 
       [value]="filteredLeads" 
       [loading]="loading"
+      [lazy]="true"
+      (onLazyLoad)="onPageChange($event)"
       [paginator]="true"
-      [rows]="10"
+      [rows]="pageSize"
+      [totalRecords]="totalRecords"
       [rowsPerPageOptions]="[10, 25, 50]"
       [showCurrentPageReport]="true"
       currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} leads"
-      [globalFilterFields]="['name', 'email', 'cidade']"
       styleClass="p-datatable-sm">
       
       <ng-template pTemplate="header">
@@ -57,9 +60,15 @@
           <th>Contato</th>
           <th>Localização</th>
           <th>Status</th>
-          <th>Área Total</th>
+          <th pSortableColumn="totalAreaHectares">
+            Área Total 
+            <p-sortIcon field="totalAreaHectares"></p-sortIcon>
+          </th>
           <th>Culturas</th>
-          <th>Score</th>
+          <th pSortableColumn="priorityScore">
+            Score 
+            <p-sortIcon field="priorityScore"></p-sortIcon>
+          </th>
           <th>Ações</th>
         </tr>
       </ng-template>
@@ -85,8 +94,8 @@
           <td>
             <select 
               class="status-select"
-              [value]="lead.status"
-              (change)="updateLeadStatus(lead, $event)"
+              [(ngModel)]="lead.status"
+              (ngModelChange)="updateLeadStatusValue(lead, $event)"
               [ngClass]="'status-' + lead.status">
               <option *ngFor="let opt of statusOptions.slice(1)" [value]="opt.value">
                 {{ opt.label }}
@@ -197,15 +206,6 @@
       </div>
 
       <div class="form-field">
-        <label for="segment">Segmento *</label>
-        <select id="segment" class="filter-select" [(ngModel)]="newLead.segment">
-          <option *ngFor="let opt of segmentoOptions" [value]="opt.value">
-            {{ opt.label }}
-          </option>
-        </select>
-      </div>
-
-      <div class="form-field">
         <label for="city">Cidade *</label>
         <input id="city" type="text" pInputText [(ngModel)]="newLead.city" placeholder="Uberlândia" />
       </div>
@@ -234,6 +234,12 @@
     <div class="properties-form">
       <h4><i class="pi pi-plus-circle"></i> Nova Propriedade</h4>
       <div class="form-grid-properties">
+        <div class="form-field full-width-field">
+          <app-kml-upload 
+            (kmlProcessed)="onKmlProcessed($event)">
+          </app-kml-upload>
+        </div>
+
         <div class="form-field">
           <label for="prop-crop">Cultura Principal *</label>
           <select id="prop-crop" class="filter-select" [(ngModel)]="newProperty.crop">

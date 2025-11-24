@@ -74,31 +74,33 @@
   gap: 1rem;
 
   .search-field {
-    input {
-      width: 100%;
-      height: 44px;
-      font-size: 0.95rem;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      background: var(--input-bg);
-      color: var(--text-primary);
-      transition: all 0.3s ease;
-
-      &:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-      }
-
-      &::placeholder {
-        color: var(--text-muted);
-      }
-    }
-
     .p-input-icon-left {
       width: 100%;
 
       i {
         color: var(--text-muted);
+        left: 1rem;
+      }
+
+      .search-input {
+        width: 100%;
+        height: 44px;
+        font-size: 0.95rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background: var(--input-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+        padding-left: 2.75rem;
+
+        &:focus {
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        &::placeholder {
+          color: var(--text-muted);
+        }
       }
     }
   }
@@ -286,5 +288,58 @@
     color: var(--text-secondary);
     font-size: 1rem;
     margin: 0;
+  }
+}
+
+::ng-deep .p-dialog {
+  .p-dialog-content {
+    padding: 1.5rem !important;
+  }
+}
+
+.dialog-content {
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .form-field {
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+    }
+
+    .filter-select,
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+    }
+
+    small.field-hint {
+      display: block;
+      margin-top: 0.25rem;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
   }
 }

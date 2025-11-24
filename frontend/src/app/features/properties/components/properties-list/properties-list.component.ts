@@ -1,4 +1,4 @@
-import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, Inject, ViewChild } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,8 +15,9 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
-import { PropertiesService, Property, CreatePropertyDto } from '../../../../core/services/properties.service';
+import { PropertiesService, Property, CreatePropertyDto, KmlUploadResponse } from '../../../../core/services/properties.service';
 import { LeadsService, Lead } from '../../../../core/services/leads.service';
+import { KmlUploadComponent } from '../../../../shared/components/kml-upload/kml-upload.component';
 
 @Component({
   selector: 'app-properties-list',
@@ -34,12 +35,15 @@ import { LeadsService, Lead } from '../../../../core/services/leads.service';
     DialogModule,
     ToastModule,
     ConfirmDialogModule,
+    KmlUploadComponent,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './properties-list.component.html',
   styleUrls: ['./properties-list.component.scss']
 })
 export class PropertiesListComponent implements OnInit {
+  @ViewChild(KmlUploadComponent) kmlUploadComponent!: KmlUploadComponent;
+  
   properties: Property[] = [];
   filteredProperties: Property[] = [];
   loading = true;
@@ -80,6 +84,7 @@ export class PropertiesListComponent implements OnInit {
     this.propertiesService.findAll({
       page: this.currentPage,
       limit: this.pageSize,
+      search: this.searchTerm || undefined,
     }).subscribe({
       next: (response) => {
         this.properties = response.data;
@@ -100,15 +105,12 @@ export class PropertiesListComponent implements OnInit {
   }
 
   applyFilters() {
-    this.filteredProperties = this.properties.filter(prop => 
-      !this.searchTerm || 
-      prop.city.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      prop.state.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
+    this.currentPage = 1;
+    this.loadProperties();
   }
 
   onPageChange(event: any) {
-    this.currentPage = event.page + 1;
+    this.currentPage = (event.first / event.rows) + 1;
     this.pageSize = event.rows;
     this.loadProperties();
   }
@@ -146,6 +148,9 @@ export class PropertiesListComponent implements OnInit {
           detail: 'Propriedade criada com sucesso!'
         });
         this.displayDialog = false;
+        if (this.kmlUploadComponent) {
+          this.kmlUploadComponent.reset();
+        }
         this.loadProperties();
       },
       error: (error) => {
@@ -190,14 +195,16 @@ export class PropertiesListComponent implements OnInit {
   }
 
   viewProperty(property: Property) {
+    // TODO: Implementar visualização detalhada
     this.messageService.add({
       severity: 'info',
       summary: 'Em Desenvolvimento',
-      detail: 'Funcionalidade de visualização em desenvolvimento'
+      detail: 'Visualização detalhada em desenvolvimento'
     });
   }
 
   editProperty(property: Property) {
+    // TODO: Implementar edição
     this.messageService.add({
       severity: 'info',
       summary: 'Em Desenvolvimento',
@@ -225,7 +232,7 @@ export class PropertiesListComponent implements OnInit {
       crop: 'soja',
       areaHectares: 0,
       city: '',
-      state: '',
+      state: 'MG',
     };
   }
 
@@ -240,5 +247,10 @@ export class PropertiesListComponent implements OnInit {
 
   formatNumber(value: number): string {
     return new Intl.NumberFormat('pt-BR').format(value);
+  }
+
+  onKmlProcessed(result: KmlUploadResponse) {
+    this.newProperty.areaHectares = result.areaHectares;
+    this.newProperty.geometry = result.geojsonString;
   }
 }
